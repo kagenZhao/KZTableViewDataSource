@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.version          = '1.0.0'
   s.summary          = '用于 TableViewCell 解耦合'
   s.description      = <<-DESC
-用于 TableViewCell 解耦合
+用于 TableViewCell 解耦合, 无需在写冗长的 datasource 代理方法
                        DESC
   s.homepage         = 'https://github.com/kagenZhao/KZTableViewDataSource'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
