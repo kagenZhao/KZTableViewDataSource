@@ -1,0 +1,16 @@
+PODS:
+  - KZTableViewDataSource (1.0.0)
+
+DEPENDENCIES:
+  - KZTableViewDataSource (from `../`)
+
+EXTERNAL SOURCES:
+  KZTableViewDataSource:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  KZTableViewDataSource: c1eb88db806036d42e8e2c9f76e2270ba11b754d
+
+PODFILE CHECKSUM: 98aa283bba719d8c278f1aaf8ceb2470d7e72a6a
+
+COCOAPODS: 1.5.3

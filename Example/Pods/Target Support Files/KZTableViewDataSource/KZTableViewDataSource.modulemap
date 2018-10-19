@@ -1,0 +1,6 @@
+framework module KZTableViewDataSource {
+  umbrella header "KZTableViewDataSource-umbrella.h"
+
+  export *
+  module * { export * }
+}
