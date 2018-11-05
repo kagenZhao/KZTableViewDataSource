@@ -10,7 +10,6 @@ import UIKit
 
 public typealias UITableViewCellReusableFectoryProtocol = (UITableViewCell & KZTableViewReusableFectoryProtocol)
 public typealias UITableViewHeaderFooterViewReusableFectoryProtocol = (UITableViewHeaderFooterView & KZTableViewReusableFectoryProtocol)
-
 public protocol KZTableViewReusableFectoryProtocol {
     associatedtype DataType
     func config(_ data: DataType?)
@@ -24,6 +23,7 @@ open class KZTableViewReusableContainer<ReusableClass, DataType>: NSObject {
         self.height = height
         self.data = data
     }
+    private override init() {}
 }
 
 public final class NilCellClass: UITableViewCellReusableFectoryProtocol {
@@ -40,15 +40,16 @@ fileprivate func generateReuseId(_ class: AnyClass) -> String {
 
 open class KZTableViewCellContainer: KZTableViewReusableContainer<UITableViewCellReusableFectoryProtocol, Any>, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
     public let `class`: AnyClass
-    open var canEdit: Bool = false
-    open var canMove: Bool = false
-    open var clickAction: ((UITableView, IndexPath, KZTableViewCellContainer) -> Void)?
+    public var canEdit: Bool = false
+    public var canMove: Bool = false
+    public var clickAction: ((UITableView, IndexPath, KZTableViewCellContainer) -> Void)?
     fileprivate var generateClosure: ((UITableView, IndexPath) -> UITableViewCell)!
     public init<T: UITableViewCellReusableFectoryProtocol>(class: T.Type,
                                                            height: CGFloat = UITableView.automaticDimension,
                                                            canEdit: Bool = false,
                                                            canMove: Bool = false,
                                                            data: T.DataType? = nil,
+                                                           additionalReused: ((UITableView, T, IndexPath, KZTableViewCellContainer, T.DataType?) -> ())? = nil,
                                                            clickAction: ((UITableView, IndexPath, KZTableViewCellContainer, T.DataType?) -> Void)? = nil) {
         self.class = `class`
         super.init(height: height, data: data)
@@ -59,9 +60,11 @@ open class KZTableViewCellContainer: KZTableViewReusableContainer<UITableViewCel
                 clickAction?(tv, ip, ct, data)
             }
         }
-        generateClosure = { tableView, indexPath in
+        generateClosure = {[weak self] tableView, indexPath in
             let cell = tableView.dequeueReusableCell(withIdentifier: generateReuseId(`class`), for: indexPath) as! T
             cell.config(data)
+            guard let sself = self else { return cell }
+            additionalReused?(tableView, cell, indexPath, sself, data)
             return cell
         }
     }
@@ -92,7 +95,7 @@ open class KZTableViewCellContainer: KZTableViewReusableContainer<UITableViewCel
 
 open class KZTableViewHeaderFooterContainer: KZTableViewReusableContainer<UITableViewHeaderFooterViewReusableFectoryProtocol, Any>, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
     public let `class`: AnyClass
-    open var clickAction: ((UITableView, Int, KZTableViewHeaderFooterContainer) -> Void)?
+    public var clickAction: ((UITableView, Int, KZTableViewHeaderFooterContainer) -> Void)?
     fileprivate var generateClosure: ((UITableView, Int) -> UIView?)!
     private weak var tableView: UITableView?
     private var section: Int?
@@ -102,6 +105,7 @@ open class KZTableViewHeaderFooterContainer: KZTableViewReusableContainer<UITabl
     public init<T: UITableViewHeaderFooterViewReusableFectoryProtocol>(class: T.Type,
                                                                        height: CGFloat = UITableView.automaticDimension,
                                                                        data: T.DataType? = nil,
+                                                                       additionalReused: ((UITableView, T, Int, KZTableViewHeaderFooterContainer, T.DataType?) -> ())? = nil,
                                                                        clickAction: ((UITableView, Int, KZTableViewHeaderFooterContainer, T.DataType?) -> Void)? = nil) {
         self.class = `class`
         super.init(height: height, data: data)
@@ -121,6 +125,7 @@ open class KZTableViewHeaderFooterContainer: KZTableViewReusableContainer<UITabl
                 self!.section = section
             }
             header.config(data)
+            additionalReused?(tableView, header, section, self!, data)
             return header
         }
     }
